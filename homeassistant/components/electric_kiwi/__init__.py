@@ -5,11 +5,12 @@ from typing import Any
 
 import aiohttp
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers import aiohttp_client, config_entry_oauth2_flow
+from homeassistant.const import Platform, CONF_CLIENT_ID, CONF_CLIENT_SECRET
+from homeassistant.core import HomeAssistant, _LOGGER
+from homeassistant.helpers import aiohttp_client, config_entry_oauth2_flow, ConfigType
 from electrickiwi_api import ElectricKiwiApi
 
+from ..application_credentials import async_import_client_credential, ClientCredential
 from . import api
 from .const import DOMAIN
 from ...exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
@@ -50,6 +51,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.config_entries.async_setup_platforms(entry, PLATFORMS)
 
     return True
+
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
