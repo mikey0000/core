@@ -1,10 +1,11 @@
-"""Constants for the Flick Electric integration."""
+"""Constants for the Electric Kiwi integration."""
 
-DOMAIN = "flick_electric"
+NAME = "Electric Kiwi"
+DOMAIN = "electric_kiwi"
+DOMAIN_DATA = f"{DOMAIN}_data"
+VERSION = "0.0.1"
+ATTRIBUTION = "Data provided by the Juice Hacker API"
+ISSUE_URL = "https://github.com/mikey0000/core/issues"
 
-CONF_TOKEN_EXPIRY = "expires"
-
-ATTR_START_AT = "start_at"
-ATTR_END_AT = "end_at"
-
-ATTR_COMPONENTS = ["retailer", "ea", "metering", "generation", "admin", "network"]
+OAUTH2_AUTHORIZE = "https://welcome-dev.electrickiwi.co.nz/oauth/authorize"
+OAUTH2_TOKEN = "https://welcome-dev.electrickiwi.co.nz/oauth/token"

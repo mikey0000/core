@@ -1,48 +1,30 @@
 """The Electric Kiwi integration."""
+from __future__ import annotations
 
-from datetime import datetime as dt
-import logging
+from typing import Any
 
 import aiohttp
-from homeassistant import config_entries
-from homeassistant.components.application_credentials import (
-    ClientCredential,
-    async_import_client_credential,
-)
-from homeassistant.helpers import config_entry_oauth2_flow
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    CONF_ACCESS_TOKEN,
-    CONF_CLIENT_ID,
-    CONF_CLIENT_SECRET,
-    Platform,
-)
-from homeassistant.core import HomeAssistant, ServiceCall
-from homeassistant.exceptions import (
-    ConfigEntryAuthFailed,
-    ConfigEntryNotReady,
-    HomeAssistantError,
-)
-from .api import ApiAuthImpl, get_feature_access
-from .const import CONF_TOKEN_EXPIRY, DOMAIN
+from homeassistant.const import Platform
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers import aiohttp_client, config_entry_oauth2_flow
+from electrickiwi_api import ElectricKiwiApi
 
-_LOGGER = logging.getLogger(__name__)
+from . import api
+from .const import DOMAIN
+from ...exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 
-CONF_ID_TOKEN = "id_token"
-
-PLATFORMS = [Platform.SENSOR]
+PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Electric Kiwi from a config entry."""
-    hass.data.setdefault(DOMAIN, {})
-
-
     implementation = (
         await config_entry_oauth2_flow.async_get_config_entry_implementation(
             hass, entry
         )
     )
+
     session = config_entry_oauth2_flow.OAuth2Session(hass, entry, implementation)
 
     try:
@@ -54,31 +36,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     except aiohttp.ClientError as err:
         raise ConfigEntryNotReady from err
 
-    if not async_entry_has_scopes(hass, entry):
-        raise ConfigEntryAuthFailed(
-            "Required scopes are not available, reauth required"
-        )
+    # if not async_entry_has_scopes(hass, entry):
+    #     raise ConfigEntryAuthFailed(
+    #         "Required scopes are not available, reauth required"
+    #     )
 
-    """assign the electric kiwi api with session here"""
-    hass.data[DOMAIN][entry.entry_id] = {}
+    # If using an aiohttp-based API lib
+    hass.data[DOMAIN][entry.entry_id] = ElectricKiwiApi(api.AsyncConfigEntryAuth(
+        aiohttp_client.async_get_clientsession(hass), session
+    )).set_active_session()
+    # we need to set the client number and connection id
 
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    hass.config_entries.async_setup_platforms(entry, PLATFORMS)
 
     return True
 
-
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    if unload_ok:
+    if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
         hass.data[DOMAIN].pop(entry.entry_id)
+
     return unload_ok
-
-
-
-def async_entry_has_scopes(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Verify that the config entry desired scope is present in the oauth token."""
-    access = get_feature_access(hass, entry)
-    token_scopes = entry.data.get("token", {}).get("scope", [])
-    return access.scope in token_scopes
-
