@@ -1,4 +1,4 @@
-"""Support for Flick Electric Pricing data."""
+"""Support for Electric Kiwi account balance."""
 from datetime import timedelta
 import logging
 
@@ -30,7 +30,7 @@ FRIENDLY_NAME = "Electric Kiwi Account Balance"
 async def async_setup_entry(
         hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    """Flick Sensor Setup."""
+    """Electric Kiwi Sensor Setup."""
     api: ElectricKiwiApi = hass.data[DOMAIN][entry.entry_id]
 
     async_add_entities([ElectricKiwiBalanceSensor(api)], True)
