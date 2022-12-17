@@ -3,32 +3,27 @@ from datetime import timedelta
 import logging
 
 import async_timeout
-
-from homeassistant.components.sensor import SensorEntity
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    ATTR_ATTRIBUTION,
-    ATTR_FRIENDLY_NAME,
-    CURRENCY_DOLLAR
-)
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from electrickiwi_api import ElectricKiwiApi
 from electrickiwi_api.model import AccountBalance
 
-from .const import DOMAIN
-from ...util import Throttle
+from homeassistant.components.sensor import SensorEntity
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import ATTR_ATTRIBUTION, ATTR_FRIENDLY_NAME, CURRENCY_DOLLAR
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.util import Throttle
+
+from .const import ATTRIBUTION, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
 SCAN_INTERVAL = timedelta(hours=24)
 
-ATTRIBUTION = "Data provided by Electric Kiwi Juice Hacker API"
 FRIENDLY_NAME = "Electric Kiwi Account Balance"
 
 
 async def async_setup_entry(
-        hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Electric Kiwi Sensor Setup."""
     api: ElectricKiwiApi = hass.data[DOMAIN][entry.entry_id]
@@ -72,4 +67,3 @@ class ElectricKiwiBalanceSensor(SensorEntity):
             self._balance = await self._api.get_account_balance()
 
         _LOGGER.debug("Pricing data: %s", self._balance.total_running_balance)
-

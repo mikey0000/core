@@ -13,7 +13,7 @@ from homeassistant.helpers import aiohttp_client, config_entry_oauth2_flow
 from . import api
 from .const import DOMAIN
 
-PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR]
+PLATFORMS: list[Platform] = [Platform.SENSOR]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -41,7 +41,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     #     )
 
     # If using an aiohttp-based API lib
-    hass.data[DOMAIN][entry.entry_id] = ElectricKiwiApi(
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = ElectricKiwiApi(
         api.AsyncConfigEntryAuth(aiohttp_client.async_get_clientsession(hass), session)
     ).set_active_session()
     # we need to set the client number and connection id

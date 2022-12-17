@@ -33,20 +33,6 @@ class ElectricKiwiLocalOAuth2Implementation(AuthImplementation):
 
         self._name = client_credential.name
 
-    # url = "https://welcome-dev.electrickiwi.co.nz/oauth/token?grant_type=refresh_token"
-
-    # payload={'refresh_token': 'sfGWBMhLp1otbtOuY7qiZKZ6hfx7e5wnIlyBGOtbHwE7Hklq'}
-    # files=[
-
-    # ]
-    # headers = {
-    #   'Authorization': 'Basic {client_id:client_secret}'
-    # }
-
-    # response = requests.request("POST", url, headers=headers, data=payload, files=files)
-
-    # print(response.text)
-
     @property
     def extra_authorize_data(self) -> dict[str, Any]:
         """Extra data that needs to be appended to the authorize url."""
@@ -84,7 +70,7 @@ class ElectricKiwiLocalOAuth2Implementation(AuthImplementation):
 
         base64_bytes = base64.b64encode(client_string_bytes)
         base64_client = base64_bytes.decode("ascii")
-        headers = {"Authorization": f"basic {base64_client}"}
+        headers = {"Authorization": f"Basic {base64_client}"}
 
         resp = await session.post(self.token_url, data=data, headers=headers)
         resp.raise_for_status()
