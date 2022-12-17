@@ -1,19 +1,17 @@
 """The Electric Kiwi integration."""
 from __future__ import annotations
 
-from typing import Any
-
 import aiohttp
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform, CONF_CLIENT_ID, CONF_CLIENT_SECRET
-from homeassistant.core import HomeAssistant, _LOGGER
-from homeassistant.helpers import aiohttp_client, config_entry_oauth2_flow, ConfigType
 from electrickiwi_api import ElectricKiwiApi
 
-from ..application_credentials import async_import_client_credential, ClientCredential
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import Platform
+from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
+from homeassistant.helpers import aiohttp_client, config_entry_oauth2_flow
+
 from . import api
 from .const import DOMAIN
-from ...exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 
 PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR]
 
@@ -43,9 +41,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     #     )
 
     # If using an aiohttp-based API lib
-    hass.data[DOMAIN][entry.entry_id] = ElectricKiwiApi(api.AsyncConfigEntryAuth(
-        aiohttp_client.async_get_clientsession(hass), session
-    )).set_active_session()
+    hass.data[DOMAIN][entry.entry_id] = ElectricKiwiApi(
+        api.AsyncConfigEntryAuth(aiohttp_client.async_get_clientsession(hass), session)
+    ).set_active_session()
     # we need to set the client number and connection id
 
     hass.config_entries.async_setup_platforms(entry, PLATFORMS)

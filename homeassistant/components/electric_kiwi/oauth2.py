@@ -1,0 +1,92 @@
+"""OAuth2 implementations for Toon."""
+from __future__ import annotations
+
+import base64
+from typing import Any, cast
+
+from homeassistant.components.application_credentials import (
+    AuthImplementation,
+    AuthorizationServer,
+    ClientCredential,
+)
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
+
+
+class ElectricKiwiLocalOAuth2Implementation(AuthImplementation):
+    """Local OAuth2 implementation for Electric Kiwi."""
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        domain: str,
+        client_credential: ClientCredential,
+        authorization_server: AuthorizationServer,
+    ) -> None:
+        """Set up Electric Kiwi oauth."""
+        super().__init__(
+            hass=hass,
+            auth_domain=domain,
+            credential=client_credential,
+            authorization_server=authorization_server,
+        )
+
+        self._name = client_credential.name
+
+    # url = "https://welcome-dev.electrickiwi.co.nz/oauth/token?grant_type=refresh_token"
+
+    # payload={'refresh_token': 'sfGWBMhLp1otbtOuY7qiZKZ6hfx7e5wnIlyBGOtbHwE7Hklq'}
+    # files=[
+
+    # ]
+    # headers = {
+    #   'Authorization': 'Basic {client_id:client_secret}'
+    # }
+
+    # response = requests.request("POST", url, headers=headers, data=payload, files=files)
+
+    # print(response.text)
+
+    @property
+    def extra_authorize_data(self) -> dict[str, Any]:
+        """Extra data that needs to be appended to the authorize url."""
+        return {
+            "scope": "read_connection_detail read_billing_frequency "
+            "read_account_running_balance read_consumption_summary read_consumption_averages "
+            "read_hop_intervals_config read_hop_connection save_hop_connection read_session"
+        }
+
+    async def async_resolve_external_data(self, external_data: Any) -> dict:
+        """Initialize local Electric Kiwi auth implementation."""
+        data = {
+            "grant_type": "authorization_code",
+            "code": external_data["code"],
+            "redirect_uri": external_data["state"]["redirect_uri"],
+        }
+
+        return await self._token_request(data)
+
+    async def _async_refresh_token(self, token: dict) -> dict:
+        """Refresh tokens."""
+        data = {
+            "grant_type": "refresh_token",
+            "refresh_token": token["refresh_token"],
+        }
+
+        new_token = await self._token_request(data)
+        return {**token, **new_token}
+
+    async def _token_request(self, data: dict) -> dict:
+        """Make a token request."""
+        session = async_get_clientsession(self.hass)
+        client_str = f"{self.client_id}:{self.client_secret}"
+        client_string_bytes = client_str.encode("ascii")
+
+        base64_bytes = base64.b64encode(client_string_bytes)
+        base64_client = base64_bytes.decode("ascii")
+        headers = {"Authorization": f"basic {base64_client}"}
+
+        resp = await session.post(self.token_url, data=data, headers=headers)
+        resp.raise_for_status()
+        resp_json = cast(dict, await resp.json())
+        return resp_json
