@@ -43,7 +43,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # If using an aiohttp-based API lib
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = ElectricKiwiApi(
         api.AsyncConfigEntryAuth(aiohttp_client.async_get_clientsession(hass), session)
-    ).set_active_session()
+    )
+    await hass.data[DOMAIN][entry.entry_id].set_active_session()
     # we need to set the client number and connection id
 
     hass.config_entries.async_setup_platforms(entry, PLATFORMS)

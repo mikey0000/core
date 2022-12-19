@@ -4,6 +4,7 @@ import logging
 
 import async_timeout
 from electrickiwi_api import ElectricKiwiApi
+from electrickiwi_api.exceptions import ApiException
 from electrickiwi_api.model import AccountBalance
 
 from homeassistant.components.sensor import SensorEntity
@@ -44,6 +45,7 @@ class ElectricKiwiBalanceSensor(SensorEntity):
             ATTR_ATTRIBUTION: ATTRIBUTION,
             ATTR_FRIENDLY_NAME: FRIENDLY_NAME,
         }
+        self._attr_unique_id = f"{api.customer_number}_{api.connection_id}_balance"
 
     @property
     def name(self):
@@ -64,6 +66,11 @@ class ElectricKiwiBalanceSensor(SensorEntity):
     async def async_update(self):
         """Get the Electric Kiwi Account Balance data from the web service."""
         async with async_timeout.timeout(60):
-            self._balance = await self._api.get_account_balance()
+            try:
+                self._balance = await self._api.get_account_balance()
+            except ApiException:
+                if self._balance is None:
+                    self._balance = AccountBalance
+                    self._balance.total_running_balance = "0"
 
         _LOGGER.debug("Pricing data: %s", self._balance.total_running_balance)
