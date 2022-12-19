@@ -20,6 +20,7 @@ from homeassistant.setup import async_setup_component
 
 CLIENT_ID = "1234"
 CLIENT_SECRET = "5678"
+REDIRECT_URI = "https://example.com/auth/external/callback"
 
 
 @pytest.fixture
@@ -48,13 +49,13 @@ async def test_full_flow(
         hass,
         {
             "flow_id": result["flow_id"],
-            "redirect_uri": "https://example.com/auth/external/callback",
+            "redirect_uri": REDIRECT_URI,
         },
     )
 
     assert result["url"] == (
         f"{OAUTH2_AUTHORIZE}?response_type=code&client_id={CLIENT_ID}"
-        "&redirect_uri=https://example.com/auth/external/callback"
+        f"&redirect_uri={REDIRECT_URI}"
         f"&state={state}"
     )
 
