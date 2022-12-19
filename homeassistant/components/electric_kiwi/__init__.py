@@ -35,17 +35,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     except aiohttp.ClientError as err:
         raise ConfigEntryNotReady from err
 
-    # if not async_entry_has_scopes(hass, entry):
-    #     raise ConfigEntryAuthFailed(
-    #         "Required scopes are not available, reauth required"
-    #     )
-
-    # If using an aiohttp-based API lib
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = ElectricKiwiApi(
         api.AsyncConfigEntryAuth(aiohttp_client.async_get_clientsession(hass), session)
     )
-    await hass.data[DOMAIN][entry.entry_id].set_active_session()
+
     # we need to set the client number and connection id
+    await hass.data[DOMAIN][entry.entry_id].set_active_session()
 
     hass.config_entries.async_setup_platforms(entry, PLATFORMS)
 

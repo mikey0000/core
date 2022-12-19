@@ -14,13 +14,13 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import Throttle
 
-from .const import ATTRIBUTION, DOMAIN
+from .const import ATTRIBUTION, DOMAIN, NAME
 
 _LOGGER = logging.getLogger(__name__)
 
 SCAN_INTERVAL = timedelta(hours=24)
 
-FRIENDLY_NAME = "Electric Kiwi Account Balance"
+FRIENDLY_NAME = f"{NAME} Account Balance"
 
 
 async def async_setup_entry(
