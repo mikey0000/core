@@ -35,12 +35,11 @@ async def async_setup_entry(
 class ElectricKiwiBalanceSensor(SensorEntity):
     """Entity object for Electric Kiwi sensor."""
 
-    _attr_native_unit_of_measurement = f"{CURRENCY_DOLLAR}"
-
     def __init__(self, api: ElectricKiwiApi) -> None:
         """Entity object for Electric Kiwi sensor."""
         self._api: ElectricKiwiApi = api
         self._balance: AccountBalance = None
+        self._attr_native_unit_of_measurement = CURRENCY_DOLLAR
         self._attributes = {
             ATTR_ATTRIBUTION: ATTRIBUTION,
             ATTR_FRIENDLY_NAME: FRIENDLY_NAME,
@@ -48,7 +47,7 @@ class ElectricKiwiBalanceSensor(SensorEntity):
         self._attr_unique_id = f"{api.customer_number}_{api.connection_id}_balance"
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Return the name of the sensor."""
         return FRIENDLY_NAME
 

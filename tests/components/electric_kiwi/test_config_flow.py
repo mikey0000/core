@@ -5,22 +5,36 @@ from unittest.mock import patch
 import pytest
 
 from homeassistant import config_entries
+from homeassistant.components.application_credentials import (
+    ClientCredential,
+    async_import_client_credential,
+)
 from homeassistant.components.electric_kiwi.const import (
     DOMAIN,
     OAUTH2_AUTHORIZE,
     OAUTH2_TOKEN,
 )
-from homeassistant.components.application_credentials import (
-    ClientCredential,
-    async_import_client_credential,
-)
 from homeassistant.core import HomeAssistant
+from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers import config_entry_oauth2_flow
 from homeassistant.setup import async_setup_component
 
 CLIENT_ID = "1234"
 CLIENT_SECRET = "5678"
 REDIRECT_URI = "https://example.com/auth/external/callback"
+SCOPES = "read_connection_detail+read_billing_frequency+read_account_running_balance+read_consumption_summary+read_consumption_averages+read_hop_intervals_config+read_hop_connection+save_hop_connection+read_session"
+
+
+@pytest.fixture(autouse=True)
+async def request_setup(current_request_with_host) -> None:
+    """Request setup."""
+    return
+
+
+@pytest.fixture(autouse=True)
+async def setup_app_creds(hass: HomeAssistant) -> None:
+    """Fixture to setup application credentials component."""
+    await async_setup_component(hass, "application_credentials", {})
 
 
 @pytest.fixture
@@ -34,16 +48,25 @@ async def setup_credentials(hass: HomeAssistant) -> None:
     )
 
 
+async def test_config_flow_no_credentials(hass):
+    """Test config flow base case with no credentials registered."""
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    assert result.get("type") == FlowResultType.ABORT
+    assert result.get("reason") == "missing_credentials"
+
+
 async def test_full_flow(
-    hass: HomeAssistant,
-    hass_client_no_auth,
-    aioclient_mock,
-    current_request_with_host,
-    setup_credentials,
+    hass: HomeAssistant, hass_client_no_auth, aioclient_mock
 ) -> None:
     """Check full flow."""
+    await async_import_client_credential(
+        hass, DOMAIN, ClientCredential(CLIENT_ID, CLIENT_SECRET), "imported-cred"
+    )
+
     result = await hass.config_entries.flow.async_init(
-        "electric_kiwi", context={"source": config_entries.SOURCE_USER}
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
     state = config_entry_oauth2_flow._encode_jwt(
         hass,
@@ -53,10 +76,12 @@ async def test_full_flow(
         },
     )
 
+    print(result)
     assert result["url"] == (
         f"{OAUTH2_AUTHORIZE}?response_type=code&client_id={CLIENT_ID}"
         f"&redirect_uri={REDIRECT_URI}"
         f"&state={state}"
+        f"&scope={SCOPES}"
     )
 
     client = await hass_client_no_auth()
