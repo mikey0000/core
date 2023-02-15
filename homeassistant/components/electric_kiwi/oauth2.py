@@ -9,9 +9,10 @@ from homeassistant.components.application_credentials import (
     AuthorizationServer,
     ClientCredential,
 )
-from .const import SCOPE_VALUES
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+
+from .const import SCOPE_VALUES
 
 
 class ElectricKiwiLocalOAuth2Implementation(AuthImplementation):
@@ -37,9 +38,7 @@ class ElectricKiwiLocalOAuth2Implementation(AuthImplementation):
     @property
     def extra_authorize_data(self) -> dict[str, Any]:
         """Extra data that needs to be appended to the authorize url."""
-        return {
-            "scope": SCOPE_VALUES
-        }
+        return {"scope": SCOPE_VALUES}
 
     async def async_resolve_external_data(self, external_data: Any) -> dict:
         """Initialize local Electric Kiwi auth implementation."""

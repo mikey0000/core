@@ -110,6 +110,7 @@ FLOWS = {
         "edl21",
         "efergy",
         "eight_sleep",
+        "electric_kiwi",
         "elgato",
         "elkm1",
         "elmax",

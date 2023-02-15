@@ -5,8 +5,6 @@ from collections.abc import Mapping
 import logging
 from typing import Any
 
-import voluptuous as vol
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_entry_oauth2_flow
@@ -48,16 +46,14 @@ class ElectricKiwiOauth2FlowHandler(
     ) -> FlowResult:
         """Dialog that informs the user that reauth is required."""
         if user_input is None:
-            return self.async_show_form(
-                step_id="reauth_confirm",
-                data_schema=vol.Schema({}),
-            )
+            return self.async_show_form(step_id="reauth_confirm")
         return await self.async_step_user()
 
     async def async_oauth_create_entry(self, data: dict) -> FlowResult:
-        """Create an oauth config entry or update existing entry for reauth."""
-        if self._reauth_entry:
-            self.hass.config_entries.async_update_entry(self._reauth_entry, data=data)
-            await self.hass.config_entries.async_reload(self._reauth_entry.entry_id)
+        """Create an entry for Electric Kiwi."""
+        existing_entry = await self.async_set_unique_id(DOMAIN)
+        if existing_entry:
+            self.hass.config_entries.async_update_entry(existing_entry, data=data)
+            await self.hass.config_entries.async_reload(existing_entry.entry_id)
             return self.async_abort(reason="reauth_successful")
         return await super().async_oauth_create_entry(data)
