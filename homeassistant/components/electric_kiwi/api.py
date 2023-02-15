@@ -5,6 +5,8 @@ from electrickiwi_api import AbstractAuth
 
 from homeassistant.helpers import config_entry_oauth2_flow
 
+from .const import API_BASE_URL
+
 
 class AsyncConfigEntryAuth(AbstractAuth):
     """Provide Electric Kiwi authentication tied to an OAuth2 based config entry."""
@@ -16,7 +18,7 @@ class AsyncConfigEntryAuth(AbstractAuth):
     ) -> None:
         """Initialize Electric Kiwi auth."""
         # add host when ready for production "https://api.electrickiwi.co.nz" defaults to dev
-        super().__init__(websession, None)
+        super().__init__(websession, API_BASE_URL)
         self._oauth_session = oauth_session
 
     async def async_get_access_token(self) -> str:

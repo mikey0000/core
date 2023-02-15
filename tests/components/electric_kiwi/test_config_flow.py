@@ -226,31 +226,3 @@ async def test_reauthentication(
 
     assert len(hass.config_entries.async_entries(DOMAIN)) == 1
     assert len(mock_setup_entry.mock_calls) == 1
-
-
-# async def test_auth_failure(hass: HomeAssistant) -> None:
-#     """Test init with an authentication failure."""
-#     with patch(
-#         "homeassistant.components.electric_kiwi.config_flow.ElectricKiwiOauth2FlowHandler.async_step_reauth",
-#         return_value={"type": data_entry_flow.FlowResultType.FORM},
-#     ) as mock_async_step_reauth:
-#         entry = MockConfigEntry(
-#             domain=DOMAIN,
-#             data={
-#             "auth_implementation": DOMAIN,
-#             "token": {
-#                 "refresh_token": "mock-refresh-token",
-#                 "access_token": "mock-access-token",
-#                 "expires_in": 10,
-#                 "expires_at": 0,  # Forces a refresh,
-#                 "token_type": "bearer",
-#                 },
-#             },
-#             options={
-#                 "entity_id": "electrickiwi-entity",
-#                 "name": NAME,
-#             },
-#         )
-#         entry.add_to_hass(hass)
-#         assert not await hass.config_entries.async_setup(entry.entry_id)
-#         mock_async_step_reauth.assert_called_once()
