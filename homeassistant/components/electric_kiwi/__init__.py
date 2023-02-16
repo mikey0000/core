@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import aiohttp
 from electrickiwi_api import ElectricKiwiApi
+from electrickiwi_api.exceptions import AuthException
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
@@ -30,7 +31,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         await session.async_ensure_token_valid()
     except aiohttp.ClientResponseError as err:
         if 400 <= err.status < 500:
-            raise ConfigEntryAuthFailed from err
+            raise ConfigEntryAuthFailed(err) from err
         raise ConfigEntryNotReady from err
     except aiohttp.ClientError as err:
         raise ConfigEntryNotReady from err
@@ -40,7 +41,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
 
     # we need to set the client number and connection id
-    await hass.data[DOMAIN][entry.entry_id].set_active_session()
+    try:
+        await hass.data[DOMAIN][entry.entry_id].set_active_session()
+    except AuthException as err:
+        raise ConfigEntryAuthFailed(err) from err
 
     hass.config_entries.async_setup_platforms(entry, PLATFORMS)
 
