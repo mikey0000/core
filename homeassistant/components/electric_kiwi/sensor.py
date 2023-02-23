@@ -161,16 +161,13 @@ class ElectricKiwiAccountData:
         self._api = api
         self.customer_number = api.customer_number
         self.connection_id = api.connection_id
-        self.throttled_update = Throttle(interval)(self._async_update)
+        self.throttled_update = Throttle(interval)(self.async_update)
         self.balance = AccountBalance
         self.balance.total_account_balance = "0"
         self.balance.total_running_balance = "0"
 
     async def async_update(self) -> None:
         """Async update to get the balances."""
-        await self._async_update()
-
-    async def _async_update(self) -> None:
         async with async_timeout.timeout(60):
             try:
                 self.balance = await self._api.get_account_balance()
