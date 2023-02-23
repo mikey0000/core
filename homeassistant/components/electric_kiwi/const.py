@@ -13,3 +13,5 @@ SCOPE_VALUES = "read_connection_detail read_billing_frequency read_account_runni
 
 ATTR_TOTAL_RUNNING_BALANCE = "total_running_balance"
 ATTR_TOTAL_CURRENT_BALANCE = "total_account_balance"
+ATTR_NEXT_BILLING_DATE = "next_billing_date"
+ATTR_HOP_PERCENTAGE = "hop_percentage"

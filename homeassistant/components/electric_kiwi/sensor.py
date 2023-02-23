@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import datetime, timedelta
 import logging
 
 import async_timeout
@@ -11,14 +11,21 @@ from electrickiwi_api import ElectricKiwiApi
 from electrickiwi_api.exceptions import ApiException
 from electrickiwi_api.model import AccountBalance
 
-from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorEntityDescription,
+    SensorStateClass,
+)
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import ATTR_ATTRIBUTION, CURRENCY_DOLLAR
+from homeassistant.const import ATTR_ATTRIBUTION, CURRENCY_DOLLAR, PERCENTAGE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import Throttle
 
 from .const import (
+    ATTR_HOP_PERCENTAGE,
+    ATTR_NEXT_BILLING_DATE,
     ATTR_TOTAL_CURRENT_BALANCE,
     ATTR_TOTAL_RUNNING_BALANCE,
     ATTRIBUTION,
@@ -35,7 +42,7 @@ SCAN_INTERVAL = timedelta(hours=24)
 class ElectricKiwiRequiredKeysMixin:
     """Mixin for required keys."""
 
-    value_func: Callable[[AccountBalance], int | str | None]
+    value_func: Callable[[AccountBalance], str | datetime | None]
 
 
 @dataclass
@@ -50,6 +57,8 @@ SENSOR_TYPES: tuple[ElectricKiwiSensorEntityDescription, ...] = (
         key=ATTR_TOTAL_RUNNING_BALANCE,
         name=f"{NAME} total running balance",
         icon="mdi:currency-usd",
+        device_class=SensorDeviceClass.MONETARY,
+        state_class=SensorStateClass.TOTAL,
         native_unit_of_measurement=CURRENCY_DOLLAR,
         value_func=lambda account_balance: account_balance.total_running_balance,
     ),
@@ -57,8 +66,29 @@ SENSOR_TYPES: tuple[ElectricKiwiSensorEntityDescription, ...] = (
         key=ATTR_TOTAL_CURRENT_BALANCE,
         name=f"{NAME} total current balance",
         icon="mdi:currency-usd",
+        device_class=SensorDeviceClass.MONETARY,
+        state_class=SensorStateClass.TOTAL,
         native_unit_of_measurement=CURRENCY_DOLLAR,
         value_func=lambda account_balance: account_balance.total_account_balance,
+    ),
+    ElectricKiwiSensorEntityDescription(
+        key=ATTR_NEXT_BILLING_DATE,
+        name=f"{NAME} next billing date",
+        icon="mdi:calendar",
+        device_class=SensorDeviceClass.DATE,
+        value_func=lambda account_balance: datetime.strptime(
+            account_balance.next_billing_date, "%Y-%m-%d"
+        ),
+    ),
+    ElectricKiwiSensorEntityDescription(
+        key=ATTR_HOP_PERCENTAGE,
+        name=f"{NAME} Hour of Power savings",
+        icon="",
+        native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_func=lambda account_balance: account_balance.connections[
+            0
+        ].hop_percentage,
     ),
 )
 
@@ -107,9 +137,9 @@ class ElectricKiwiAccountSensor(SensorEntity):
         return f"{self.entity_description.name}"
 
     @property
-    def native_value(self) -> str:
+    def native_value(self) -> datetime | str | None:
         """Return the state of the sensor."""
-        return "self.entity_description.value_func(self._api.balance)"
+        return self.entity_description.value_func(self._api.balance)
 
     @property
     def extra_state_attributes(self) -> dict[str, str]:
