@@ -54,7 +54,7 @@ class ElectricKiwiBalanceSensor(SensorEntity):
     @property
     def native_value(self):
         """Return the state of the sensor."""
-        return self._balance.total_running_balance
+        return self._balance.total_account_balance
 
     @property
     def extra_state_attributes(self):
@@ -70,6 +70,6 @@ class ElectricKiwiBalanceSensor(SensorEntity):
             except ApiException:
                 if self._balance is None:
                     self._balance = AccountBalance
-                    self._balance.total_running_balance = "0"
+                    self._balance.total_account_balance = "0"
 
-        _LOGGER.debug("Pricing data: %s", self._balance.total_running_balance)
+        _LOGGER.debug("Pricing data: %s", self._balance.total_account_balance)
