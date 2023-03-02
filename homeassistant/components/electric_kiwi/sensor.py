@@ -35,7 +35,7 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-SCAN_INTERVAL = timedelta(hours=24)
+SCAN_INTERVAL = timedelta(hours=6)
 
 
 @dataclass
