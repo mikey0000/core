@@ -56,6 +56,7 @@ class Platform(StrEnum):
     TIME = "time"
     TTS = "tts"
     VACUUM = "vacuum"
+    LAWN_MOWER = "lawn_mower"
     UPDATE = "update"
     WATER_HEATER = "water_heater"
     WEATHER = "weather"
