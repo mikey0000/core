@@ -26,7 +26,7 @@ import homeassistant.util.dt as dt_util
 DOMAIN = "kitchen_sink"
 
 
-COMPONENTS_WITH_DEMO_PLATFORM = [Platform.SENSOR, Platform.LOCK, Platform.IMAGE]
+COMPONENTS_WITH_DEMO_PLATFORM = [Platform.SENSOR, Platform.LOCK, Platform.IMAGE, Platform.LAWN_MOWER]
 
 CONFIG_SCHEMA = cv.empty_config_schema(DOMAIN)
 
