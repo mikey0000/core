@@ -43,6 +43,11 @@
       "hoppowersavings": {
         "name": "Hour of power savings"
       }
+    },
+    "select": {
+      "hopselector": {
+        "name": "Hour of free power"
+      }
     }
   }
 }
