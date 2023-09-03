@@ -12,6 +12,7 @@ APPLICATION_CREDENTIALS = [
     "google_sheets",
     "home_connect",
     "lametric",
+    "luba",
     "lyric",
     "neato",
     "nest",

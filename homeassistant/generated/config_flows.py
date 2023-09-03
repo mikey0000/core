@@ -260,6 +260,7 @@ FLOWS = {
         "logi_circle",
         "lookin",
         "loqed",
+        "luba",
         "luftdaten",
         "lutron_caseta",
         "lyric",

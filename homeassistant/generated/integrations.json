@@ -3143,6 +3143,12 @@
       "config_flow": true,
       "iot_class": "local_push"
     },
+    "luba": {
+      "name": "Mammotion Luba",
+      "integration_type": "hub",
+      "config_flow": true,
+      "iot_class": "local_polling"
+    },
     "luftdaten": {
       "name": "Sensor.Community",
       "integration_type": "device",
