@@ -10,10 +10,10 @@ from synology_dsm.api.surveillance_station.camera import SynoCamera
 from synology_dsm.exceptions import SynologyDSMNotLoggedInException
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_MAC, CONF_TIMEOUT, CONF_VERIFY_SSL
+from homeassistant.const import CONF_MAC, CONF_VERIFY_SSL
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
-from homeassistant.helpers import config_validation as cv, device_registry as dr
+from homeassistant.helpers import device_registry as dr
 
 from .common import SynoApi, raise_config_entry_auth_error
 from .const import (
@@ -32,9 +32,6 @@ from .coordinator import (
 )
 from .models import SynologyDSMData
 from .service import async_setup_services
-
-CONFIG_SCHEMA = cv.removed(DOMAIN, raise_if_present=False)
-
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -63,10 +60,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.config_entries.async_update_entry(
             entry, data={**entry.data, CONF_VERIFY_SSL: DEFAULT_VERIFY_SSL}
         )
-    if entry.options.get(CONF_TIMEOUT):
-        options = dict(entry.options)
-        options.pop(CONF_TIMEOUT)
-        hass.config_entries.async_update_entry(entry, data=entry.data, options=options)
 
     # Continue setup
     api = SynoApi(hass, entry)

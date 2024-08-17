@@ -13,7 +13,6 @@ from homeassistant.const import (
     ATTR_NAME,
     CONF_UNIT_OF_MEASUREMENT,
     CONF_ZONE,
-    UnitOfLength,
 )
 from homeassistant.core import (
     Event,
@@ -27,7 +26,6 @@ from homeassistant.helpers.issue_registry import IssueSeverity, async_create_iss
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util.location import distance
-from homeassistant.util.unit_conversion import DistanceConverter
 
 from .const import (
     ATTR_DIR_OF_TRAVEL,
@@ -45,7 +43,7 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-ProximityConfigEntry = ConfigEntry["ProximityDataUpdateCoordinator"]
+type ProximityConfigEntry = ConfigEntry[ProximityDataUpdateCoordinator]
 
 
 @dataclass
@@ -144,18 +142,6 @@ class ProximityDataUpdateCoordinator(DataUpdateCoordinator[ProximityData]):
                     ],
                 },
             )
-
-    def convert_legacy(self, value: float | str) -> float | str:
-        """Round and convert given distance value."""
-        if isinstance(value, str):
-            return value
-        return round(
-            DistanceConverter.convert(
-                value,
-                UnitOfLength.METERS,
-                self.unit_of_measurement,
-            )
-        )
 
     def _calc_distance_to_zone(
         self,
@@ -350,7 +336,7 @@ class ProximityDataUpdateCoordinator(DataUpdateCoordinator[ProximityData]):
             if cast(int, nearest_distance_to) == int(distance_to):
                 _LOGGER.debug("set equally close entity_data: %s", entity_data)
                 proximity_data[ATTR_NEAREST] = (
-                    f"{proximity_data[ATTR_NEAREST]}, {str(entity_data[ATTR_NAME])}"
+                    f"{proximity_data[ATTR_NEAREST]}, {entity_data[ATTR_NAME]!s}"
                 )
 
         return ProximityData(proximity_data, entities_data)

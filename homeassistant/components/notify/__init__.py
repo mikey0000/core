@@ -41,6 +41,7 @@ from .legacy import (  # noqa: F401
     async_setup_legacy,
     check_templates_warn,
 )
+from .repairs import migrate_notify_issue  # noqa: F401
 
 # mypy: disallow-any-generics
 
@@ -90,14 +91,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     async def persistent_notification(service: ServiceCall) -> None:
         """Send notification via the built-in persistent_notify integration."""
         message: Template = service.data[ATTR_MESSAGE]
-        message.hass = hass
         check_templates_warn(hass, message)
 
         title = None
         title_tpl: Template | None
         if title_tpl := service.data.get(ATTR_TITLE):
             check_templates_warn(hass, title_tpl)
-            title_tpl.hass = hass
             title = title_tpl.async_render(parse_result=False)
 
         notification_id = None
